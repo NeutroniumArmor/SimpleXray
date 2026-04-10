@@ -167,6 +167,9 @@ class MainViewModel(application: Application) :
 
     init {
         Log.d(TAG, "MainViewModel initialized.")
+
+        setupGlobalSocksAuthenticator()
+
         viewModelScope.launch(Dispatchers.IO) {
             _isServiceEnabled.value = isServiceRunning(application, TProxyService::class.java)
 
@@ -228,6 +231,21 @@ class MainViewModel(application: Application) :
                 )
             )
         }
+    }
+
+    private fun setupGlobalSocksAuthenticator() {
+        java.net.Authenticator.setDefault(object : java.net.Authenticator() {
+            override fun getPasswordAuthentication(): java.net.PasswordAuthentication? {
+                val user = prefs.socksUsername
+                val pass = prefs.socksPassword
+
+                return if (user.isNotEmpty() || pass.isNotEmpty()) {
+                    java.net.PasswordAuthentication(user, pass.toCharArray())
+                } else {
+                    null
+                }
+            }
+        })
     }
 
     fun setControlMenuClickable(isClickable: Boolean) {
