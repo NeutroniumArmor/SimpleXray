@@ -84,6 +84,8 @@ class MainViewModel(application: Application) :
     private val _settingsState = MutableStateFlow(
         SettingsState(
             socksPort = InputFieldState(prefs.socksPort.toString()),
+            socksUser = InputFieldState(prefs.socksUsername),
+            socksPass = InputFieldState(prefs.socksPassword),
             dnsIpv4 = InputFieldState(prefs.dnsIpv4),
             dnsIpv6 = InputFieldState(prefs.dnsIpv6),
             switches = SwitchStates(
@@ -177,6 +179,8 @@ class MainViewModel(application: Application) :
     private fun updateSettingsState() {
         _settingsState.value = _settingsState.value.copy(
             socksPort = InputFieldState(prefs.socksPort.toString()),
+            socksUser = InputFieldState(prefs.socksUsername),
+            socksPass = InputFieldState(prefs.socksPassword),
             dnsIpv4 = InputFieldState(prefs.dnsIpv4),
             dnsIpv6 = InputFieldState(prefs.dnsIpv6),
             switches = SwitchStates(
@@ -402,6 +406,46 @@ class MainViewModel(application: Application) :
                 socksPort = InputFieldState(
                     value = portString,
                     error = application.getString(R.string.invalid_port),
+                    isValid = false
+                )
+            )
+            false
+        }
+    }
+
+    fun updateSocksUser(userString: String): Boolean {
+        val byteCount = userString.toByteArray(Charsets.UTF_8).size
+        return if (byteCount <= 255) {
+            prefs.socksUsername = userString
+            _settingsState.value = _settingsState.value.copy(
+                socksUser = InputFieldState(userString)
+            )
+            true
+        } else {
+            _settingsState.value = _settingsState.value.copy(
+                socksUser = InputFieldState(
+                    value = userString,
+                    error = "Username length must not exceed 255 bytes",
+                    isValid = false
+                )
+            )
+            false
+        }
+    }
+
+    fun updateSocksPass(passString: String): Boolean {
+        val byteCount = passString.toByteArray(Charsets.UTF_8).size
+        return if (byteCount <= 255) {
+            prefs.socksPassword = passString
+            _settingsState.value = _settingsState.value.copy(
+                socksPass = InputFieldState(passString)
+            )
+            true
+        } else {
+            _settingsState.value = _settingsState.value.copy(
+                socksPass = InputFieldState(
+                    value = passString,
+                    error = "Password length must not exceed 255 bytes",
                     isValid = false
                 )
             )
